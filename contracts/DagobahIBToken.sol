@@ -7,5 +7,5 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  *  @dev Token contract represent shares of insurance module.
  */
 contract DagobahIBToken is ERC20 {
-    constructor(uint256 initialSupply) ERC20("Dagobah IB token", "DIib") {}
+    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {}
 }
