@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox")
+require("@openzeppelin/hardhat-upgrades")
 require("hardhat-deploy")
 require("hardhat-deploy-ethers")
 require("./tasks")
