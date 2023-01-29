@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 /**
  *  @dev Token contract represent deal of issued insurance.
  */
-contract DagobahPosition is ERC721 {
+contract DagobahPositionToken is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    constructor() ERC721("Dagobah Position", "DPS") {}
+    constructor(string memory _name, string memory _symbol) ERC721(_name, _symbol) {}
 }

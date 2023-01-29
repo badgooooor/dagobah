@@ -5,6 +5,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import {MarketAPI} from "@zondax/filecoin-solidity/contracts/v0.8/MarketAPI.sol";
 import {MarketTypes} from "@zondax/filecoin-solidity/contracts/v0.8/types/MarketTypes.sol";
 
+import {DagobahIBToken} from "./DagobahIBToken.sol";
+import {DagobahPositionToken} from "./DagobahPositionToken.sol";
+
 /**
  *  @dev Contract module act as point of contact.
  */
@@ -27,17 +30,23 @@ contract DagobahRegistry is Ownable {
     // Fee rate.
     uint256 public feeRate = 1;
 
+    // Mapping deal id -> dealTokenAddr token id.
+    mapping(uint64 => uint256) public dealTokenId;
+
     // Events.
     event FeeRateUpdated(address sender, uint256 feeRate);
 
-    constructor(address _ibTokenAddr, address _dealTokenAddr, uint256 _feeRate) {
-        ibTokenAddr = _ibTokenAddr;
-        dealTokenAddr = _dealTokenAddr;
-        feeRate = _feeRate;
+    constructor() {
+        DagobahIBToken ibToken = new DagobahIBToken("ibToken", "DGib");
+        DagobahPositionToken positionToken = new DagobahPositionToken("positionToken", "DBT");
+
+        ibTokenAddr = address(ibToken);
+        dealTokenAddr = address(positionToken);
+
         registryAddr = address(this);
     }
 
-    function setFee(uint256 _feeRate) public onlyOwner {
+    function setFeeRate(uint256 _feeRate) public onlyOwner {
         feeRate = _feeRate;
         emit FeeRateUpdated(msg.sender, _feeRate);
     }
