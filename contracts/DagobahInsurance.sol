@@ -36,7 +36,7 @@ contract DagobahRegistry is Ownable {
     // Events.
     event FeeRateUpdated(address sender, uint256 feeRate);
 
-    constructor() {
+    constructor() payable {
         DagobahIBToken ibToken = new DagobahIBToken("ibToken", "DGib");
         DagobahPositionToken positionToken = new DagobahPositionToken("positionToken", "DBT");
 
@@ -46,19 +46,29 @@ contract DagobahRegistry is Ownable {
         registryAddr = address(this);
     }
 
+    // - Client pays FIL tokens
+    // - Get deal information, check deal token, and mint token position
+    function issue(uint64 _dealId) public payable returns (uint256) {
+        require(msg.value >= 0.25 ether, "DagobahRegistry: Minimum FIL required.");
+        require(dealTokenId[_dealId] != 0, "DagobahRegistry: Position is already opened.");
+
+        uint64 dealProviderId = getDealProvider(_dealId);
+        uint64 dealSize = getDealSize(_dealId);
+
+        // Mint token with deal provider, deal size.
+        DagobahPositionToken positionToken = DagobahPositionToken(dealTokenAddr);
+        positionToken.mint(msg.sender, _dealId, dealProviderId, dealSize);
+        return 1;
+    }
+
+    // @todo claim fn.
+    // @todo get remaining fee in position.
+    // @todo get refil position.
+
     function setFeeRate(uint256 _feeRate) public onlyOwner {
         feeRate = _feeRate;
         emit FeeRateUpdated(msg.sender, _feeRate);
     }
-
-    // METHODS
-    // Issue
-    // - Issue an insurance.
-    // Renewal
-    // - Refill opened insurance? or renew via new issue?
-    // - Get expiry timestamp.
-    // Decay
-    // - Get token fee left.
 
     // Wrapper methods for Zondax API contract call.
     // @return miner id.
@@ -69,17 +79,5 @@ contract DagobahRegistry is Ownable {
     // @return file size.
     function getDealSize(uint64 dealId) internal returns (uint64) {
         return MarketAPI.getDealDataCommitment(dealId).size;
-    }
-
-    // @return deal start epoch and end epoch
-    function getDealTerm(uint64 dealId) internal returns (MarketTypes.GetDealTermReturn memory) {
-        return MarketAPI.getDealTerm(dealId);
-    }
-
-    // @return activation epoch (int64) and termination epoch (int64).
-    function getDealActivation(
-        uint64 dealId
-    ) internal returns (MarketTypes.GetDealActivationReturn memory) {
-        return MarketAPI.getDealActivation(dealId);
     }
 }
